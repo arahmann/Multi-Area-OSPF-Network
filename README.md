@@ -1,34 +1,39 @@
 # Multi-Area OSPF Network Design & Implementation
 
+A Cisco Packet Tracer project demonstrating multi-area OSPF configuration, route propagation, neighbor adjacency verification, and end-to-end connectivity across three LANs.
+
 ## Project Overview
 
-This project demonstrates the design, configuration, and verification of a multi-area OSPF (Open Shortest Path First) network using Cisco routers and switches in Cisco Packet Tracer.
+This network uses a hub-and-spoke topology with three Cisco 2911 routers. OSPF Area 0 is the backbone, connecting two additional areas:
 
-The network uses three routers connected in a hub-and-spoke topology. OSPF Area 0 acts as the backbone, while two additional areas provide separate LAN segments. The routers exchange routing information dynamically, enabling communication between all three LANs.
+- **Area 0:** R1 LAN and the point-to-point links between routers.
+- **Area 10:** R2 LAN.
+- **Area 20:** R3 LAN.
 
-## Network Topology
+R2 and R3 act as Area Border Routers (ABRs), connecting their respective non-backbone areas to Area 0. OSPF dynamically exchanges routing information so hosts in different LANs can communicate without static routes.
 
-**Topology:** Three routers (R1, R2, R3), three switches, and six PCs.
+## Topology
 
-- R1 connects to R2 and R3.
-- Each router connects to its own LAN through a switch.
-- R1 operates in OSPF Area 0.
-- R2 connects Area 10 to Area 0.
-- R3 connects Area 20 to Area 0.
+- 3 × Cisco 2911 routers (R1, R2, R3)
+- 3 × Cisco 2960 switches (SW1, SW2, SW3)
+- 6 × PCs (2 per LAN)
+- 2 × point-to-point router links using /30 subnets
 
-**Topology Screenshot:** `Screenshots/Topology.png` *(to be added)*
+![Multi-Area OSPF topology](Topology.png)
 
-## Network Addressing
+## IP Addressing
 
-| Network | IP Address | Purpose |
+### LAN and WAN Networks
+
+| Segment | Network | OSPF Area |
 |---|---|---|
 | R1 LAN | 192.168.10.0/24 | Area 0 |
 | R2 LAN | 192.168.20.0/24 | Area 10 |
 | R3 LAN | 192.168.30.0/24 | Area 20 |
-| R1–R2 Link | 10.0.12.0/30 | OSPF Backbone |
-| R1–R3 Link | 10.0.13.0/30 | OSPF Backbone |
+| R1–R2 link | 10.0.12.0/30 | Area 0 |
+| R1–R3 link | 10.0.13.0/30 | Area 0 |
 
-### Router Interfaces
+### Router Interface Addressing
 
 | Router | Interface | IP Address |
 |---|---|---|
@@ -40,74 +45,81 @@ The network uses three routers connected in a hub-and-spoke topology. OSPF Area 
 | R3 | G0/0 | 192.168.30.1/24 |
 | R3 | G0/1 | 10.0.13.2/30 |
 
-## OSPF Configuration
+## OSPF Design
 
-The project uses OSPF Process ID 1 with manually configured Router IDs.
+OSPF Process ID: **1**
 
-| Router | Router ID | OSPF Areas |
+| Router | Router ID | OSPF Networks / Areas |
 |---|---|---|
-| R1 | 1.1.1.1 | Area 0 |
-| R2 | 2.2.2.2 | Areas 0 and 10 |
-| R3 | 3.3.3.3 | Areas 0 and 20 |
+| R1 | 1.1.1.1 | R1 LAN and both router links — Area 0 |
+| R2 | 2.2.2.2 | R1–R2 link — Area 0; R2 LAN — Area 10 |
+| R3 | 3.3.3.3 | R1–R3 link — Area 0; R3 LAN — Area 20 |
 
-R2 and R3 function as Area Border Routers (ABRs), connecting their respective non-backbone areas to Area 0.
+**ABRs:** R2 and R3 each connect Area 0 to a non-backbone area.
 
-## Technologies & Concepts
+## Key Technologies and Concepts
 
-- Cisco Packet Tracer
-- Cisco IOS CLI
-- OSPF Dynamic Routing
-- Multi-Area OSPF
-- OSPF Router IDs
-- OSPF Neighbor Adjacencies
-- Backbone Area (Area 0)
+- Cisco Packet Tracer and Cisco IOS CLI
+- OSPFv2 dynamic routing
+- Multi-area OSPF and backbone Area 0
+- Router IDs and OSPF neighbor adjacencies
 - Area Border Routers (ABRs)
-- Inter-Area Route Advertisement
-- IPv4 Addressing and Subnetting
-- /30 Point-to-Point Networks
-- Routing Table Analysis
+- Inter-area route advertisement
+- IPv4 addressing, subnetting, and /30 point-to-point links
+- Routing table interpretation
 
-## Verification & Testing
+## Configuration and Verification
 
-The following checks were performed:
+The network was configured and tested using Cisco IOS CLI commands.
 
-- Verified OSPF neighbor adjacencies on R1.
-- Confirmed FULL neighbor states with R2 and R3.
-- Verified OSPF-learned routes on all three routers.
-- Confirmed inter-area routes using the `O IA` route designation.
-- Tested connectivity between PCs on different LANs.
-- Confirmed successful communication between all three LAN segments.
-
-### Verification Commands
+Useful verification commands:
 
 ```text
+show ip interface brief
 show ip ospf
 show ip ospf neighbor
 show ip route ospf
 show ip route
-show ip interface brief
 ```
 
-## Screenshots
+### Verification Results
 
-The `Screenshots` folder contains the following verification evidence:
+- R1 established OSPF neighbor adjacencies with R2 and R3.
+- Both neighbors reached the **FULL** state.
+- OSPF-learned routes were present in the routers' routing tables.
+- Inter-area routes appeared with the **O IA** route code.
+- Cross-LAN connectivity was tested successfully between PCs on different LANs.
 
-1. `R1-show ip ospf neighbor & show ip route ospf`
-2. `R2-show ip route ospf`
-3. `R3-show ip route ospf`
-4. PC1 successful connectivity tests to the R2 and R3 LANs.
-5. PC3 successful connectivity test to the R3 LAN.
+### OSPF Neighbor and Routing Table — R1
 
-The network topology screenshot will also be added to this folder.
+![R1 OSPF neighbor and routing table](R1-show%20ip%20ospf%20neighbor%20%26%20show%20ip%20route%20ospf.png)
+
+### OSPF Routing Table — R2
+
+![R2 OSPF routing table](R2%20%E2%80%94%20show%20ip%20route%20ospf.png)
+
+### OSPF Routing Table — R3
+
+![R3 OSPF routing table](R3%20%E2%80%94%20show%20ip%20route%20ospf.png)
+
+### End-to-End Connectivity Tests
+
+**PC1:** Successful connectivity tests to hosts in the R2 and R3 LANs.
+
+![PC1 connectivity tests](PC1%20%E2%80%94%20successful%20ping%20to%20R2%20and%20R3%20LANs.png)
+
+**PC3:** Successful connectivity test to a host in the R3 LAN.
+
+![PC3 connectivity test](PC3%20%E2%80%94%20successful%20ping%20to%20R3%20LAN.png)
 
 ## Project Files
 
-- `Multi_Area_OSPF_Network_Design.pkt` — Cisco Packet Tracer project file.
+- `Multi_Area_OSPF_Network_Design.pkt` — Cisco Packet Tracer simulation file.
 - `README.md` — Project documentation.
-- `Screenshots/` — Network topology and verification screenshots.
+- PNG files in the repository root — topology and configuration/verification evidence.
 
 ## Learning Outcomes
 
-Through this project, I practiced configuring multi-area OSPF, establishing neighbor adjacencies, understanding Area Border Routers, analyzing routing tables, and verifying end-to-end connectivity across multiple network areas.
+This project provided practical experience with multi-area OSPF design and configuration, ABR operation, neighbor adjacency verification, inter-area route analysis, and troubleshooting connectivity across routed LANs.
 
 **Tools:** Cisco Packet Tracer | Cisco IOS CLI
